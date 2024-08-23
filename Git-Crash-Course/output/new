@@ -1,0 +1,136 @@
+https://cses.fi/problemset/task/1077/
+
+the most implement heavy. I used a lot of functions to make it look clean and easy to understand. ms1<=ms2 and ms2-ms1<=1. so basically i have two multiset ms1,corresponding sum sum1 and similarly ms2 and sum2.
+
+
+
+code:
+void add(multiset<int>&ms,int x,ll&sum)
+{
+    ms.insert(x);
+    sum+=x;
+}
+void deleteElement(multiset<int>&ms,int val,ll&sum)
+{
+    ms.erase(ms.find(val));
+    sum-=val;
+}
+int findElement(multiset<int>&ms,int val)
+{
+    if(ms.find(val)!=ms.end()){return 1;}
+    return 0;
+}
+int getMax(multiset<int>&ms)
+{
+    auto ptr=ms.end();
+    ptr--;
+    return *ptr;
+}
+int getMin(multiset<int>&ms)
+{
+    return *ms.begin();
+}
+void addElement(multiset<int>&ms1,ll&sum1,multiset<int>&ms2,ll&sum2,int val)
+{
+    if(ms2.size()==0){
+        add(ms2,val,sum2);
+        return;
+    }
+    if(ms1.size()==0){
+        int t2=*ms2.begin();
+        deleteElement(ms2,t2,sum2);
+        int t1=val;
+        if(t1>t2){ swap(t1,t2);}
+        ms1.insert(t1);
+        ms2.insert(t2);
+        sum1=t1;
+        sum2=t2;
+        return;
+    }
+    if(ms1.size()==ms2.size()){
+        ms1.insert(val);
+        sum1+=val;
+        int t= getMax(ms1);
+        deleteElement(ms1,t,sum1);
+        add(ms2,t,sum2);
+        return;
+    }
+    add(ms1,val,sum1);
+    int t1= getMax(ms1);
+    int t2= getMin(ms2);
+    if(t1>t2)
+    {
+        deleteElement(ms1,t1,sum1);
+        deleteElement(ms2,t2,sum2);
+        add(ms1,t2,sum1);
+        add(ms2,t1,sum2);
+    }
+
+}
+void deleteElementFromSet(multiset<int>&ms1,ll&sum1,multiset<int>&ms2,ll&sum2,int val){
+
+    if(ms1.size()==0){
+        deleteElement(ms2,val,sum2);
+        return;
+    }
+    if(ms1.size()<ms2.size())
+    {
+        if(findElement(ms2,val)){
+            deleteElement(ms2,val,sum2);
+            return;
+        }
+        int t= getMin(ms2);
+        deleteElement(ms2,t,sum2);
+        add(ms1,t,sum1);
+        deleteElement(ms1,val,sum1);
+        return;
+    }
+
+    if(findElement(ms1,val)){
+        deleteElement(ms1,val,sum1);
+        return;
+    }
+
+    int t= getMax(ms1);
+    deleteElement(ms1,t,sum1);
+    add(ms2,t,sum2);
+    deleteElement(ms2,val,sum2);
+
+}
+
+void giveAns(multiset<int>&ms1,ll sum1,multiset<int>&ms2,ll sum2)
+{
+    ll x= getMin(ms2);
+    ll s1=ms1.size();
+    ll s2=ms2.size();
+    ll ans=x*s1-sum1+ sum2-x*s2;
+    cout<<ans<<" ";
+}
+
+void f()
+{
+   int n,k;cin>>n>>k;
+   vector<int>v(n+1);
+   for(int i=1;i<=n;i++){cin>>v[i];}
+   multiset<int>ms1,ms2;
+   ll sum1=0,sum2=0;
+   for(int i=1;i<=k;i++){
+       addElement(ms1,sum1,ms2,sum2,v[i]);
+   }
+   giveAns(ms1,sum1,ms2,sum2);
+   int p1=1;
+   int p2=k+1;
+   while(p2<=n){
+//       cout<<"\n";
+//       for(int x:ms1){cout<<x<<" ";}cout<<endl;
+//       for(int x:ms2){cout<<x<<" ";}cout<<endl;
+//       cout<<endl;
+       deleteElementFromSet(ms1,sum1,ms2,sum2,v[p1]);
+       addElement(ms1,sum1,ms2,sum2,v[p2]);
+       giveAns(ms1,sum1,ms2,sum2);
+       p2++;
+       p1++;
+   }
+
+}
+
